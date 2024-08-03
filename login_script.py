@@ -23,17 +23,27 @@ browser = None
 # telegram消息
 message = 'diylink自动化脚本运行\n'
 
+async def solve_captcha(page):
+    # 提示用户手动解决 CAPTCHA
+    print("检测到 CAPTCHA 页面，请手动完成验证后按回车继续...")
+    input("按回车键继续...")
+    # 可以在此处加入对 CAPTCHA 验证后的页面状态的检测逻辑
+    # 例如，检测到登录成功后继续执行
+
 async def login(username, password):
     global browser
 
     page = None  # 确保 page 在任何情况下都被定义
     try:
         if not browser:
-            browser = await launch(headless=True, args=['--no-sandbox', '--disable-setuid-sandbox'])
+            browser = await launch(headless=False, args=['--no-sandbox', '--disable-setuid-sandbox'])
 
         page = await browser.newPage()
         url = 'https://console.diylink.net/login'
-        await page.goto(url, {'timeout': 60000})  # 增加超时时间
+        await page.goto(url, {'timeout': 120000})  # 增加超时时间
+
+        # 等待页面加载
+        await page.waitForSelector('#email', {'timeout': 120000})  # 等待元素出现
 
         # 定位输入框
         username_input = await page.querySelector('#email')  # 使用 ID 选择器
@@ -52,7 +62,14 @@ async def login(username, password):
         else:
             raise Exception('无法找到登录按钮')
 
-        await page.waitForNavigation({'timeout': 60000})  # 增加超时时间
+        # 检测是否出现 CAPTCHA 页面
+        await page.waitForSelector('div#cf-content', {'timeout': 15000})  # 等待 CAPTCHA 页面出现
+        if await page.querySelector('div#cf-content'):
+            await solve_captcha(page)
+            # 重新加载页面以继续尝试登录
+            await page.reload({'timeout': 120000})
+
+        await page.waitForNavigation({'timeout': 120000})  # 增加超时时间
 
         is_logged_in = await page.evaluate('''() => {
             const logoutButton = document.querySelector('a[href="/logout"]');
