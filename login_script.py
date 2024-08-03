@@ -33,7 +33,7 @@ async def login(username, password):
 
         page = await browser.newPage()
         url = 'https://console.diylink.net/login'
-        await page.goto(url)
+        await page.goto(url, {'timeout': 60000})  # 增加超时时间
 
         # 定位输入框
         username_input = await page.querySelector('#email')  # 使用 ID 选择器
@@ -52,7 +52,7 @@ async def login(username, password):
         else:
             raise Exception('无法找到登录按钮')
 
-        await page.waitForNavigation()
+        await page.waitForNavigation({'timeout': 60000})  # 增加超时时间
 
         is_logged_in = await page.evaluate('''() => {
             const logoutButton = document.querySelector('a[href="/logout"]');
@@ -68,6 +68,8 @@ async def login(username, password):
     finally:
         if page:
             await page.close()
+        if browser:
+            await browser.close()  # 确保浏览器正确关闭
 
 async def main():
     global message
