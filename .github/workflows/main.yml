@@ -1,40 +1,31 @@
+# .github/workflows/run-login-script.yml
 name: Run Login Script
 
 on:
-  workflow_dispatch:  # 手动触发工作流
-  schedule:
-    - cron: "0 0 1 * *"  # 每月的第1天的午夜运行
   push:
     branches:
-      - main  # 当主分支有新的提交时触发工作流
+      - main
+  workflow_dispatch:
 
 jobs:
   run-script:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v3
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.x'  # 使用稳定版本的 Python
+          python-version: '3.x'  # 使用你需要的 Python 版本
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pyppeteer aiofiles requests
-
-      - name: Create accounts.json from environment variable
-        run: echo "$ACCOUNTS_JSON" > accounts.json
-        env:
-          ACCOUNTS_JSON: ${{ secrets.ACCOUNTS_JSON }}  # 从 GitHub Secrets 中获取环境变量
+          pip install requests beautifulsoup4
 
       - name: Run login script
+        run: python login_script.py
         env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          ACCOUNTS_JSON: ${{ secrets.ACCOUNTS_JSON }}
-        run: |
-          python login_script.py
+          USERNAME: ${{ secrets.USERNAME }}
+          PASSWORD: ${{ secrets.PASSWORD }}
