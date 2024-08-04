@@ -6,8 +6,8 @@ login_url = 'https://console.diylink.net/login'
 
 # 登录信息
 login_data = {
-    'username': 'your_username',  # 替换为你的用户名
-    'password': 'your_password'   # 替换为你的密码
+    'username': 'raglessschral@gmail.com',  # 替换为你的用户名
+    'password': 'Hsr7528@gg'   # 替换为你的密码
 }
 
 # 创建一个会话对象，用于保持会话状态
